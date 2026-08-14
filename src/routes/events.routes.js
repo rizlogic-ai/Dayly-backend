@@ -1,6 +1,7 @@
 const express = require('express');
 const asyncHandler = require('../middleware/asyncHandler');
 const eventsRepository = require('../repositories/events.repository');
+const { isValidDateString } = require('../utils/validators');
 
 const router = express.Router();
 
@@ -17,6 +18,9 @@ router.get(
 
     if (!startDate || !endDate) {
       return res.status(400).json({ error: 'Provide either ?date= or both ?start= and ?end=.' });
+    }
+    if (!isValidDateString(startDate) || !isValidDateString(endDate)) {
+      return res.status(400).json({ error: 'Dates must be in "YYYY-MM-DD" format.' });
     }
 
     res.json(await eventsRepository.getForDateRange(req.user.id, startDate, endDate));

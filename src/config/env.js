@@ -29,9 +29,18 @@ function resolvePgSsl() {
   return !isLocal;
 }
 
+// Undefined means "allow any origin" (cors()'s own default) — fine for
+// now since auth is a Bearer header, not a cookie, so there's no
+// credentialed-CORS CSRF exposure. Set once a browser-based client
+// exists and origins are actually known.
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+  : undefined;
+
 module.exports = {
   port: process.env.PORT || 4000,
   databaseUrl: process.env.DATABASE_URL,
+  corsOrigins,
   // Render's certs aren't in Node's default trust store chain the way a
   // public CA's would be, so this stays `rejectUnauthorized: false` —
   // the connection is still encrypted, just not chain-verified. That's

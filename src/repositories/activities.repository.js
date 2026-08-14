@@ -96,4 +96,20 @@ async function archive(userId, id, archivedAt) {
   return rows[0] ? toDomain(rows[0]) : null;
 }
 
-module.exports = { getAllForUser, getById, save, archive };
+// The other half of archive() — clears archived_at rather than deleting
+// anything, same "archive, never delete" rule, just reversed. Built as
+// its own query (not "save a copy with archivedAt: null", the way the
+// client's own DriftActivityRepository.restore() works) since this
+// repository's save() is a full upsert that would require the caller to
+// already have every other field in hand just to flip one column.
+async function restore(userId, id) {
+  const { rows } = await pool.query(
+    `UPDATE dayly.activities SET archived_at = NULL
+     WHERE user_id = $1 AND id = $2
+     RETURNING *`,
+    [userId, id]
+  );
+  return rows[0] ? toDomain(rows[0]) : null;
+}
+
+module.exports = { getAllForUser, getById, save, archive, restore };

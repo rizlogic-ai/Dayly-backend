@@ -65,6 +65,21 @@ src/
   covers Render Postgres) — no extra env var needed unless you want to
   force it either way with `PGSSL=true`/`false`. See `src/config/env.js`.
 
+## Hardening
+
+- **CORS** — open to any origin by default (fine while every client is
+  the mobile app authenticating with a Bearer header, not a cookie). Set
+  `CORS_ORIGIN` (comma-separated for more than one) once a browser-based
+  client exists and you know its origin(s).
+- **Rate limiting** — a single ceiling of 300 requests / 15 min per IP
+  across all of `/api` (`src/app.js`), meant as a "stop a runaway or
+  malicious client" backstop, not a product-shaped per-endpoint limit.
+  `/health` is excluded so uptime checks never compete with it.
+- **`helmet()`** — standard security headers, no configuration needed.
+- Every request logs one line (method, path, status, duration) via
+  `src/middleware/requestLogger.js` — deliberately not a logging library,
+  this is the whole need for a service this size.
+
 ## Auth flow
 
 1. Client signs in with Firebase Auth (any provider) and gets an ID token.
@@ -97,6 +112,7 @@ All routes below except `/health` require `Authorization: Bearer <idToken>`.
 | POST | `/api/activities` | Create (`title`, `moduleType`, `recurrenceRule` required; `id` optional — server generates one if omitted) |
 | PUT | `/api/activities/:id` | Full save-in-place, same semantics as the client's own `save()` |
 | POST | `/api/activities/:id/archive` | Archive, never delete — history stays queryable |
+| POST | `/api/activities/:id/restore` | Un-archive |
 | GET | `/api/activities/:id/events` | Completion events for one activity |
 | POST | `/api/activities/:id/events` | Append a completion event (`occurrenceDate`, `state`: `done`\|`skipped`) |
 | GET | `/api/events?date=YYYY-MM-DD` (or `?start=&end=`) | Completion events across all activities in a date range |
