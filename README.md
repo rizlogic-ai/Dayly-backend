@@ -61,6 +61,9 @@ src/
 - Set the same four env vars as above in the service's environment
   settings. `FIREBASE_PRIVATE_KEY` needs its newlines kept as literal
   `\n` inside the single-line value most platforms expect for env vars.
+- SSL is auto-detected (on for any non-localhost `DATABASE_URL`, which
+  covers Render Postgres) — no extra env var needed unless you want to
+  force it either way with `PGSSL=true`/`false`. See `src/config/env.js`.
 
 ## Auth flow
 
