@@ -1,34 +1,9 @@
 const express = require('express');
 const asyncHandler = require('../middleware/asyncHandler');
 const groceryRepository = require('../repositories/grocery.repository');
-const { isFiniteNumber, isBoolean } = require('../utils/validators');
+const { validateGroceryBody } = require('../utils/validators');
 
 const router = express.Router();
-
-// `requireName`: true for POST (name is mandatory), false for PUT (name
-// is one of several optionally-patched fields) — everything else here is
-// "if present, must be the right type," never mandatory on either verb.
-function validateGroceryBody(body, { requireName }) {
-  if (requireName && (typeof body.name !== 'string' || body.name.trim() === '')) {
-    return 'name is required.';
-  }
-  if (body.name !== undefined && typeof body.name !== 'string') {
-    return 'name must be a string.';
-  }
-  if (body.quantity !== undefined && body.quantity !== null && !isFiniteNumber(body.quantity)) {
-    return 'quantity must be a number.';
-  }
-  if (body.unit !== undefined && body.unit !== null && typeof body.unit !== 'string') {
-    return 'unit must be a string.';
-  }
-  if (body.note !== undefined && body.note !== null && typeof body.note !== 'string') {
-    return 'note must be a string.';
-  }
-  if (body.checked !== undefined && !isBoolean(body.checked)) {
-    return 'checked must be a boolean.';
-  }
-  return null;
-}
 
 router.get(
   '/',

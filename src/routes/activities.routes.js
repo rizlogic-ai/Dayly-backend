@@ -3,27 +3,13 @@ const crypto = require('crypto');
 const asyncHandler = require('../middleware/asyncHandler');
 const activitiesRepository = require('../repositories/activities.repository');
 const eventsRepository = require('../repositories/events.repository');
-const { MODULE_TYPES } = require('../constants/moduleTypes');
-const { isValidDateString, isNonNegativeInteger } = require('../utils/validators');
+const {
+  isValidDateString,
+  isNonNegativeInteger,
+  validateActivityBody,
+} = require('../utils/validators');
 
 const router = express.Router();
-
-// Only the fields this backend actually needs to validate before
-// persisting. `recurrenceRule`/`trackingSpec` are passed through as
-// opaque JSON — see schema.sql's comment on why this never re-validates
-// their sealed-hierarchy shape itself.
-function validateActivityBody(body) {
-  if (typeof body.title !== 'string' || body.title.trim() === '') {
-    return 'title is required.';
-  }
-  if (!MODULE_TYPES.includes(body.moduleType)) {
-    return `moduleType must be one of: ${MODULE_TYPES.join(', ')}.`;
-  }
-  if (typeof body.recurrenceRule !== 'object' || body.recurrenceRule === null || !body.recurrenceRule.type) {
-    return 'recurrenceRule must be an object with a "type" field.';
-  }
-  return null;
-}
 
 router.get(
   '/',
