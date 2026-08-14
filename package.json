@@ -2,6 +2,8 @@
   "name": "dayly-backend",
   "version": "0.1.0",
   "description": "Backend API for the Dayly app: Firebase-verified auth, user preferences, activities, completion events, and grocery lists.",
+  "license": "UNLICENSED",
+  "private": true,
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
