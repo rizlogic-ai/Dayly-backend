@@ -43,10 +43,11 @@ src/
      `dayly` **database** there (the `dayly` **schema** inside it is
      created automatically by the migration, distinct from the database
      name — you can call the database anything).
-   - `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY`
-     — from Firebase Console → Project Settings → Service Accounts →
-     Generate new private key. Paste the matching fields from the
-     downloaded JSON; keep the private key's `\n` escapes literal.
+   - Firebase Admin credentials — from Firebase Console → Project
+     Settings → Service Accounts → Generate new private key. See
+     `.env.example` for the two supported formats (a single
+     `FIREBASE_SERVICE_ACCOUNT_BASE64`, preferred, or three discrete
+     `FIREBASE_*` vars for quicker local hand-editing).
 3. `npm run migrate` — applies `src/db/schema.sql`. Safe to re-run any
    time; every statement is `IF NOT EXISTS`.
 4. `npm run dev` (hot-reload via nodemon) or `npm start`.
@@ -58,9 +59,14 @@ src/
 - Run `npm run migrate` once (Render's shell, or a one-off job) against
   the same `DATABASE_URL` the web service uses, before or after first
   deploy — it's idempotent either way.
-- Set the same four env vars as above in the service's environment
-  settings. `FIREBASE_PRIVATE_KEY` needs its newlines kept as literal
-  `\n` inside the single-line value most platforms expect for env vars.
+- Set `DATABASE_URL` and **`FIREBASE_SERVICE_ACCOUNT_BASE64`** (not the
+  three discrete `FIREBASE_*` vars) in the service's environment
+  settings. This is not optional on Render specifically — its env var
+  editor doesn't reliably preserve a literal multi-line PEM key through
+  the `\n`-escaped-single-line convention the discrete vars need, which
+  surfaced as a real boot crash (`ERR_OSSL_UNSUPPORTED`, "Failed to
+  parse private key"). Base64 has no newlines or quotes for any
+  platform's editor to mangle.
 - SSL is auto-detected (on for any non-localhost `DATABASE_URL`, which
   covers Render Postgres) — no extra env var needed unless you want to
   force it either way with `PGSSL=true`/`false`. See `src/config/env.js`.
