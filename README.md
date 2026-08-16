@@ -105,7 +105,10 @@ level, not just the route level.
 
 ## API
 
-All routes below except `/health` require `Authorization: Bearer <idToken>`.
+All routes below except `/health` and `/api/voice/parse` require
+`Authorization: Bearer <idToken>`. `/api/voice/parse` instead expects an
+`X-Voice-Api-Key` header matching `VOICE_API_KEY` (if that's set — see
+`.env.example`), since the Flutter app has no per-user login yet.
 
 | Method | Path | Notes |
 |---|---|---|
@@ -127,6 +130,7 @@ All routes below except `/health` require `Authorization: Bearer <idToken>`.
 | PUT | `/api/grocery-items/:id` | Partial update (e.g. toggle `checked`) |
 | DELETE | `/api/grocery-items/:id` | Remove one item |
 | DELETE | `/api/grocery-items/checked` | Bulk-remove everything checked off |
+| POST | `/api/voice/parse` | Classify a voice transcript (`transcript`, optional `now` ISO date-time) via OpenAI — returns intent + extracted fields for the Voice tab. 503 if `OPENAI_API_KEY` isn't set. Never sees the user's actual schedule data (see `src/services/openaiVoiceParser.js`) |
 
 `recurrenceRule` / `trackingSpec` are passed through as opaque JSON
 matching `dayly-app/lib/data/drift/json_codecs.dart`'s shapes (e.g.

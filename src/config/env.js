@@ -82,4 +82,21 @@ module.exports = {
   // the standard/documented setting for connecting to Render Postgres.
   pgSsl: shouldUseSsl(process.env.DATABASE_URL, process.env.PGSSL) ? { rejectUnauthorized: false } : false,
   firebase: resolveFirebaseCredentials(),
+  // Optional on purpose: the app boots and every other route works
+  // without it. Only POST /api/voice/parse needs it, and checks lazily
+  // at request time (see routes/voice.routes.js) so a deploy that hasn't
+  // set it yet doesn't crash on startup — it just 503s that one route.
+  openaiApiKey: process.env.OPENAI_API_KEY || null,
+  // gpt-4o-mini is OpenAI's standard cheap/fast tier as of when this was
+  // written — override via env if a cheaper or newer model exists later
+  // without needing a code change.
+  openaiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+  // Shared secret gating /api/voice/parse — this endpoint predates any
+  // client-side login (the Flutter app has no Firebase Auth integration
+  // yet, so it can't send a real user Bearer token), so it can't reuse
+  // `authenticate`. Null means unset, which the route treats as "allow
+  // anything" (fine for early testing) rather than crashing the app;
+  // set VOICE_API_KEY once this ships to real users, so random callers
+  // can't burn through the OpenAI quota.
+  voiceApiKey: process.env.VOICE_API_KEY || null,
 };

@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const env = require('./config/env');
 const authenticate = require('./middleware/authenticate');
+const requireVoiceApiKey = require('./middleware/requireVoiceApiKey');
 const errorHandler = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
 
@@ -12,6 +13,7 @@ const preferencesRoutes = require('./routes/preferences.routes');
 const activitiesRoutes = require('./routes/activities.routes');
 const eventsRoutes = require('./routes/events.routes');
 const groceryRoutes = require('./routes/grocery.routes');
+const voiceRoutes = require('./routes/voice.routes');
 
 const app = express();
 
@@ -51,6 +53,10 @@ app.use('/api/preferences', authenticate, preferencesRoutes);
 app.use('/api/activities', authenticate, activitiesRoutes);
 app.use('/api/events', authenticate, eventsRoutes);
 app.use('/api/grocery-items', authenticate, groceryRoutes);
+// Gated by a shared secret, not `authenticate` — see
+// requireVoiceApiKey.js's comment on why (no client-side login exists
+// yet for this route to check a real user against).
+app.use('/api/voice', requireVoiceApiKey, voiceRoutes);
 
 app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 app.use(errorHandler);
