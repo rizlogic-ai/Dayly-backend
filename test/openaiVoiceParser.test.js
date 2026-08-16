@@ -74,6 +74,15 @@ describe('classifyVoiceCommand', () => {
       assert.equal(capturedBody.model, env.openaiModel);
       assert.equal(capturedBody.response_format.type, 'json_schema');
       assert.equal(capturedBody.response_format.json_schema.strict, true);
+      // wantsSchedule lets the model flag "they want a real day/time,
+      // they just didn't say one" (e.g. "schedule a grocery task")
+      // separately from "this is genuinely a floating note" (e.g. "add
+      // buy milk") — both end up schedule.type: "untimed" otherwise.
+      assert.ok(
+        capturedBody.response_format.json_schema.schema.properties.create.required.includes(
+          'wantsSchedule'
+        )
+      );
       assert.match(capturedBody.messages[1].content, /what do I have today/);
       assert.match(capturedBody.messages[1].content, /2026-08-16T09:00:00\.000Z/);
 

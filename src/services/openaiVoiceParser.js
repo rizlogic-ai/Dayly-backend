@@ -29,6 +29,7 @@ For "create":
 - "title": a short, clean description of the actual thing to do — never include trigger phrases ("remind me to", "add"), schedule/time/date words, or filler.
 - "moduleType": exactly one of ${CREATABLE_MODULE_TYPES.join(', ')}. Default to "task" if no specific life-area is implied. Never output "prayer".
 - "remindersRequested": true only if the user said something like "remind me" — a plain "add"/"create"/"schedule" without that wording is false.
+- "wantsSchedule": only meaningful when schedule.type ends up "untimed" (nothing extractable). true if the user's wording implies they DO want this on a real day/time — e.g. they said "schedule", "remind me", "set a reminder/appointment" — they just didn't say when yet, so the app should ask. false if the wording sounds like a plain floating note/idea with no timing intent at all (e.g. "add buy milk", "note that I need new shoes"). Always false when schedule.type isn't "untimed".
 - "schedule.type": one of "daily" (every day), "weekly" (specific weekday(s)), "everyNDays" (a cadence measured in days), "oneTime" (a single specific occurrence — a date and/or time was mentioned with no repeat cadence), or "untimed" (no date, time, or repeat cadence mentioned at all — a plain floating to-do).
 - "schedule.times": every clock time mentioned, each as a 24-hour "HH:mm" string (e.g. "08:00", "20:30"). Empty array if none were mentioned.
 - "schedule.weekdays": only meaningful when schedule.type is "weekly" — lowercase full weekday names ("monday".."sunday"). Empty array otherwise.
@@ -61,6 +62,7 @@ function buildSchema() {
             title: { type: 'string' },
             moduleType: { type: 'string', enum: CREATABLE_MODULE_TYPES },
             remindersRequested: { type: 'boolean' },
+            wantsSchedule: { type: 'boolean' },
             schedule: {
               type: 'object',
               additionalProperties: false,
@@ -83,7 +85,7 @@ function buildSchema() {
               required: ['type', 'times', 'weekdays', 'intervalDays', 'date'],
             },
           },
-          required: ['title', 'moduleType', 'remindersRequested', 'schedule'],
+          required: ['title', 'moduleType', 'remindersRequested', 'wantsSchedule', 'schedule'],
         },
       },
       required: ['intent', 'query', 'create'],
