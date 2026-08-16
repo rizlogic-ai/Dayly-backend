@@ -83,6 +83,13 @@ describe('classifyVoiceCommand', () => {
           'wantsSchedule'
         )
       );
+      // remainingOnly distinguishes "what's remaining today" (only
+      // not-yet-done items) from a full "what do I have today" recap.
+      assert.ok(
+        capturedBody.response_format.json_schema.schema.properties.query.required.includes(
+          'remainingOnly'
+        )
+      );
       assert.match(capturedBody.messages[1].content, /what do I have today/);
       assert.match(capturedBody.messages[1].content, /2026-08-16T09:00:00\.000Z/);
 

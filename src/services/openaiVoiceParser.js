@@ -23,7 +23,7 @@ const SYSTEM_PROMPT = `You are a precise command classifier for a personal sched
 - "create": the user wants to add a brand-new task, reminder, or activity (e.g. "remind me to...", "add...", "schedule...", "create a task to...").
 - "unrecognized": neither of the above clearly applies.
 
-For "query", set scope to "week" only if the user clearly means a multi-day/weekly view; otherwise default to "today".
+For "query", set scope to "week" only if the user clearly means a multi-day/weekly view; otherwise default to "today". Set "remainingOnly" to true only if the user specifically asks what's left/remaining/still to do (e.g. "what's remaining today", "what do I still need to do", "what's left this week") — this means they want only things not yet handled, not a full recap. A plain "what do I have today" or "summarize my day" is a full recap, so remainingOnly is false.
 
 For "create":
 - "title": a short, clean description of the actual thing to do — never include trigger phrases ("remind me to", "add"), schedule/time/date words, or filler.
@@ -52,8 +52,9 @@ function buildSchema() {
           additionalProperties: false,
           properties: {
             scope: { type: 'string', enum: ['today', 'week'] },
+            remainingOnly: { type: 'boolean' },
           },
-          required: ['scope'],
+          required: ['scope', 'remainingOnly'],
         },
         create: {
           type: ['object', 'null'],
