@@ -6,6 +6,7 @@ const eventsRepository = require('../repositories/events.repository');
 const {
   isValidDateString,
   isNonNegativeInteger,
+  isValidEventState,
   validateActivityBody,
 } = require('../utils/validators');
 
@@ -58,6 +59,10 @@ router.put(
     const error = validateActivityBody(req.body);
     if (error) return res.status(400).json({ error });
 
+    if (req.body.createdAt !== undefined && Number.isNaN(Date.parse(req.body.createdAt))) {
+      return res.status(400).json({ error: 'createdAt, if provided, must be a valid ISO 8601 date-time string.' });
+    }
+
     const existing = await activitiesRepository.getById(req.user.id, req.params.id);
 
     const saved = await activitiesRepository.save(req.user.id, {
@@ -72,7 +77,14 @@ router.put(
         ? req.body.reminderEnabled
         : existing?.reminderEnabled ?? false,
       id: req.params.id,
-      createdAt: existing ? existing.createdAt : new Date(),
+      // First sync of a client-created activity: use its real creation
+      // time (e.g. syncing an activity a user made a week ago shouldn't
+      // record it as created just now) rather than always defaulting to
+      // "now". Once a row exists, its createdAt never changes again —
+      // a client resending an older createdAt on a later edit is not
+      // honored, matching the client's own semantics where createdAt is
+      // set once at creation.
+      createdAt: existing ? existing.createdAt : req.body.createdAt ? new Date(req.body.createdAt) : new Date(),
       archivedAt: 'archivedAt' in req.body
         ? req.body.archivedAt
         : existing?.archivedAt ?? null,
@@ -117,8 +129,8 @@ router.post(
     if (occurrenceIndex !== undefined && !isNonNegativeInteger(occurrenceIndex)) {
       return res.status(400).json({ error: 'occurrenceIndex must be a non-negative integer.' });
     }
-    if (state !== 'done' && state !== 'skipped') {
-      return res.status(400).json({ error: 'state must be "done" or "skipped".' });
+    if (!isValidEventState(state)) {
+      return res.status(400).json({ error: 'state must be "pending", "done", or "skipped".' });
     }
 
     const event = await eventsRepository.append(req.user.id, req.params.id, {

@@ -39,6 +39,17 @@ function isBoolean(value) {
   return typeof value === 'boolean';
 }
 
+// Matches every CompletionState the client's domain layer can produce
+// (dayly-app/lib/domain/completion_state.dart) — including 'pending',
+// which is what an "uncheck" appends, not just the two terminal states.
+// See schema.sql's CHECK constraint comment for why 'pending' has to be
+// a real, storable value here too.
+const EVENT_STATES = ['pending', 'done', 'skipped'];
+
+function isValidEventState(value) {
+  return EVENT_STATES.includes(value);
+}
+
 // Only the fields this backend actually needs to validate before
 // persisting. `recurrenceRule`/`trackingSpec` are passed through as
 // opaque JSON — see schema.sql's comment on why this never re-validates
@@ -110,6 +121,7 @@ module.exports = {
   isNonNegativeInteger,
   isFiniteNumber,
   isBoolean,
+  isValidEventState,
   validateActivityBody,
   validateGroceryBody,
   validatePreferencesBody,

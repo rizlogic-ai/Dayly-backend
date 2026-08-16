@@ -17,6 +17,7 @@ const {
   isNonNegativeInteger,
   isFiniteNumber,
   isBoolean,
+  isValidEventState,
   validateActivityBody,
   validateGroceryBody,
   validatePreferencesBody,
@@ -69,6 +70,20 @@ describe('isFiniteNumber / isBoolean', () => {
     assert.equal(isBoolean(true), true);
     assert.equal(isBoolean('true'), false);
     assert.equal(isBoolean(1), false);
+  });
+});
+
+describe('isValidEventState', () => {
+  test('accepts pending, done, and skipped', () => {
+    assert.equal(isValidEventState('pending'), true);
+    assert.equal(isValidEventState('done'), true);
+    assert.equal(isValidEventState('skipped'), true);
+  });
+
+  test('rejects anything else', () => {
+    assert.equal(isValidEventState('completed'), false);
+    assert.equal(isValidEventState(''), false);
+    assert.equal(isValidEventState(undefined), false);
   });
 });
 

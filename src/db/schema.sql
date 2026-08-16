@@ -70,16 +70,35 @@ CREATE INDEX IF NOT EXISTS idx_activities_user_active
 -- Append-only, same as the client's CompletionEvents table: never
 -- UPDATEd, only inserted. Current state for a given occurrence is
 -- whatever the caller folds from the latest row by `recorded_at`.
+--
+-- 'pending' is a real, storable state, not just a derived default: the
+-- client's TodayController.uncheck() appends a 'pending' event (see
+-- dayly-app/lib/data/drift/drift_completion_repository.dart — its
+-- CompletionEvents table has no CHECK at all, so it already accepts
+-- whatever CompletionState the domain layer passes). Without it here,
+-- syncing an "uncheck" action would be rejected by this constraint —
+-- the fold would keep showing "done" on the backend forever after a
+-- client-side uncheck.
 CREATE TABLE IF NOT EXISTS dayly.completion_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   activity_id TEXT NOT NULL REFERENCES dayly.activities(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES dayly.users(id) ON DELETE CASCADE,
   occurrence_date DATE NOT NULL,
   occurrence_index INT NOT NULL DEFAULT 0,
-  state TEXT NOT NULL CHECK (state IN ('done', 'skipped')),
+  state TEXT NOT NULL CHECK (state IN ('pending', 'done', 'skipped')),
   logged_value JSONB,
   recorded_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Widens the CHECK for a database that already ran an earlier version
+-- of this schema (CREATE TABLE IF NOT EXISTS above is a no-op for an
+-- existing table, so the constraint itself needs its own migration
+-- path). Safe to re-run: DROP ... IF EXISTS, then re-add unconditionally.
+-- `completion_events_state_check` is Postgres's own default name for an
+-- unnamed CHECK on this column (`{table}_{column}_check`).
+ALTER TABLE dayly.completion_events DROP CONSTRAINT IF EXISTS completion_events_state_check;
+ALTER TABLE dayly.completion_events ADD CONSTRAINT completion_events_state_check
+  CHECK (state IN ('pending', 'done', 'skipped'));
 
 CREATE INDEX IF NOT EXISTS idx_completion_events_activity_date
   ON dayly.completion_events(activity_id, occurrence_date, occurrence_index);

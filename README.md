@@ -123,7 +123,7 @@ All routes below except `/health` and `/api/voice/parse` require
 | POST | `/api/activities/:id/archive` | Archive, never delete — history stays queryable |
 | POST | `/api/activities/:id/restore` | Un-archive |
 | GET | `/api/activities/:id/events` | Completion events for one activity |
-| POST | `/api/activities/:id/events` | Append a completion event (`occurrenceDate`, `state`: `done`\|`skipped`) |
+| POST | `/api/activities/:id/events` | Append a completion event (`occurrenceDate`, `state`: `pending`\|`done`\|`skipped` — `pending` is what an "uncheck" appends) |
 | GET | `/api/events?date=YYYY-MM-DD` (or `?start=&end=`) | Completion events across all activities in a date range |
 | GET | `/api/grocery-items` | List, unchecked first |
 | POST | `/api/grocery-items` | Create (`name` required; `quantity`, `unit`, `note` optional) |
