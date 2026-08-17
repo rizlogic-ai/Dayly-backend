@@ -59,9 +59,15 @@ CREATE TABLE IF NOT EXISTS dayly.activities (
   recurrence_rule JSONB NOT NULL,
   tracking_spec JSONB NOT NULL DEFAULT '{"type":"none"}'::jsonb,
   reminder_enabled BOOLEAN NOT NULL DEFAULT false,
+  reminder_lead_minutes INT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   archived_at TIMESTAMPTZ
 );
+
+-- CREATE TABLE IF NOT EXISTS above is a no-op for a database that already
+-- ran an earlier version of this schema, so this column needs its own
+-- migration path. Safe to re-run.
+ALTER TABLE dayly.activities ADD COLUMN IF NOT EXISTS reminder_lead_minutes INT NOT NULL DEFAULT 0;
 
 CREATE INDEX IF NOT EXISTS idx_activities_user ON dayly.activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_user_active

@@ -64,6 +64,9 @@ function validateActivityBody(body) {
   if (typeof body.recurrenceRule !== 'object' || body.recurrenceRule === null || !body.recurrenceRule.type) {
     return 'recurrenceRule must be an object with a "type" field.';
   }
+  if (body.reminderLeadMinutes !== undefined && !isNonNegativeInteger(body.reminderLeadMinutes)) {
+    return 'reminderLeadMinutes must be a non-negative integer.';
+  }
   return null;
 }
 

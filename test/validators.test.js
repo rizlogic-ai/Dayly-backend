@@ -122,6 +122,27 @@ describe('validateActivityBody', () => {
     };
     assert.equal(validateActivityBody(body), null);
   });
+
+  test('accepts a missing reminderLeadMinutes (defaults elsewhere) and a valid one', () => {
+    assert.equal(validateActivityBody(validBody()), null);
+    assert.equal(validateActivityBody({ ...validBody(), reminderLeadMinutes: 15 }), null);
+    assert.equal(validateActivityBody({ ...validBody(), reminderLeadMinutes: 0 }), null);
+  });
+
+  test('rejects a negative, non-integer, or non-numeric reminderLeadMinutes', () => {
+    assert.match(
+      validateActivityBody({ ...validBody(), reminderLeadMinutes: -5 }),
+      /reminderLeadMinutes/
+    );
+    assert.match(
+      validateActivityBody({ ...validBody(), reminderLeadMinutes: 15.5 }),
+      /reminderLeadMinutes/
+    );
+    assert.match(
+      validateActivityBody({ ...validBody(), reminderLeadMinutes: 'soon' }),
+      /reminderLeadMinutes/
+    );
+  });
 });
 
 describe('validateGroceryBody', () => {

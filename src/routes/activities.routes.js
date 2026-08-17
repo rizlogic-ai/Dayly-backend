@@ -76,6 +76,9 @@ router.put(
       reminderEnabled: 'reminderEnabled' in req.body
         ? req.body.reminderEnabled
         : existing?.reminderEnabled ?? false,
+      reminderLeadMinutes: 'reminderLeadMinutes' in req.body
+        ? req.body.reminderLeadMinutes
+        : existing?.reminderLeadMinutes ?? 0,
       id: req.params.id,
       // First sync of a client-created activity: use its real creation
       // time (e.g. syncing an activity a user made a week ago shouldn't

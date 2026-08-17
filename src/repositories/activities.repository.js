@@ -10,6 +10,7 @@ function toDomain(row) {
     recurrenceRule: row.recurrence_rule,
     trackingSpec: row.tracking_spec,
     reminderEnabled: row.reminder_enabled,
+    reminderLeadMinutes: row.reminder_lead_minutes,
     createdAt: row.created_at,
     archivedAt: row.archived_at,
   };
@@ -44,8 +45,8 @@ async function getById(userId, id) {
 async function save(userId, activity) {
   const { rows } = await pool.query(
     `INSERT INTO dayly.activities
-       (id, user_id, title, module_type, note, recurrence_rule, tracking_spec, reminder_enabled, created_at, archived_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       (id, user_id, title, module_type, note, recurrence_rule, tracking_spec, reminder_enabled, reminder_lead_minutes, created_at, archived_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
      ON CONFLICT (id) DO UPDATE SET
        title = EXCLUDED.title,
        module_type = EXCLUDED.module_type,
@@ -53,6 +54,7 @@ async function save(userId, activity) {
        recurrence_rule = EXCLUDED.recurrence_rule,
        tracking_spec = EXCLUDED.tracking_spec,
        reminder_enabled = EXCLUDED.reminder_enabled,
+       reminder_lead_minutes = EXCLUDED.reminder_lead_minutes,
        archived_at = EXCLUDED.archived_at
      WHERE dayly.activities.user_id = $2
      RETURNING *`,
@@ -65,6 +67,7 @@ async function save(userId, activity) {
       JSON.stringify(activity.recurrenceRule),
       JSON.stringify(activity.trackingSpec ?? { type: 'none' }),
       activity.reminderEnabled ?? false,
+      activity.reminderLeadMinutes ?? 0,
       activity.createdAt ?? new Date(),
       activity.archivedAt ?? null,
     ]
