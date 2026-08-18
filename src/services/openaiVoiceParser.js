@@ -20,8 +20,8 @@ const CREATABLE_MODULE_TYPES = MODULE_TYPES.filter((type) => type !== 'prayer');
 const SYSTEM_PROMPT = `You are a precise command classifier for a personal scheduling app called Dayly. Given a voice transcript and the current date/time, decide exactly one intent:
 
 - "query": the user is asking about their EXISTING schedule (e.g. "what do I have today", "summarize my day", "what's on my week", "how many things do I have planned"). This includes requests to summarize, list, or describe their day/week — those are queries, NOT new items to create.
-- "create": the user wants to add a brand-new task, reminder, or activity (e.g. "remind me to...", "add...", "schedule...", "create a task to...").
-- "unrecognized": neither of the above clearly applies.
+- "create": the user wants to add a brand-new task, reminder, or activity, AND said what it actually is (e.g. "remind me to call the bank", "add buy milk", "schedule a dentist appointment").
+- "unrecognized": neither of the above clearly applies. This includes a transcript that only expresses generic intent to use this feature without saying what to actually create — "I want to create a plan", "can you add a task", "let's add something", "create a reminder" — none of these say what the plan/task/reminder actually is, so they're unrecognized, not "create" with the title set to a generic word like "plan" or "task" or "a reminder".
 
 For "query", set scope to "week" only if the user clearly means a multi-day/weekly view; otherwise default to "today". Set "remainingOnly" to true only if the user specifically asks what's left/remaining/still to do (e.g. "what's remaining today", "what do I still need to do", "what's left this week") — this means they want only things not yet handled, not a full recap. A plain "what do I have today" or "summarize my day" is a full recap, so remainingOnly is false.
 
